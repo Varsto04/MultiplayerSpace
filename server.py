@@ -41,25 +41,29 @@ class TCPReciv(Thread):
         while True:
             try:
                 data = self.__client_socket.recv(BUFSIZE).decode('utf-8')
-                print(data)
                 data = data.split(';', 1)
-                print(data)
+                #print(data)
                 if data[0] == 'm':
                     msg = f'{self.__client_address[0]}:{self.__client_address[1]} {data[1]}'
                     for player in players_list:
                         player.client_socket.sendall(f'm;{msg}'.encode())
                 if data[0] == 'g':
                     data = data[1].split(';')
-                    print(data)
-                    if data[1].find('1') == 0:
-                        # data = data[1].split(';')[0]
-                        msg = f'{data[0]}:-x'
-                    if data[1].find('1') == 2:
-                        msg = f'{data[0]}:+x'
-                    if data[1].find('1') == 4:
-                        msg = f'{data[0]}:+y'
-                    if data[1].find('1') == 6:
-                        msg = f'{data[0]}:-y'
+                    if data[3].find('1') == 0:
+                        msg = f'{data[0]};{data[1]};{float(data[2]) + 2}'
+                    if data[3].find('1') == 2:
+                        msg = f'{data[0]};{data[1]};{float(data[2]) - 2}'
+                    if data[3].find('1') == 4:
+                        coords = data[1].split(':')
+                        x, y = coords[0], coords[1]
+                        angle = float(data[2])
+                        change_x = -math.sin(math.radians(angle)) * 2
+                        change_y = math.cos(math.radians(angle)) * 2
+                        x = float(x) + change_x
+                        y = float(y) + change_y
+                        msg = f'{data[0]};{x}:{y};{data[2]}'
+                    if data[3].find('1') == 6:
+                        pass
                     for player in players_list:
                         player.get_tcp_sock().sendall(f'g;{msg}'.encode())
             except socket.error as e:

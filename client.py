@@ -207,10 +207,13 @@ class TCPSend(Thread):
     def send_data(self):
         if 1 in client_input.values():
             print('Sending move...')
-            data = f'g;{user_socket};'
+            #data = f'g;{user_socket};'
             for i in range(0, len(sprite_players_list)):
                 if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
-                    pass
+                    x = sprite_players_list[i].center_x
+                    y = sprite_players_list[i].center_y
+                    angle = sprite_players_list[i].angle
+            data = f'g;{user_socket};{x}:{y};{angle};'
             data += InteractionManager.move_message(client_input)
             data = data.encode()
             try:
@@ -230,7 +233,7 @@ class TCPReciv(Thread):
             try:
                 data = self.__tcp_socket.recv(BUFSIZE).decode('utf-8')
                 data = data.split('#')
-                #print(data)
+                print(data)
                 for cur_data in data:
                     cur_data.strip()
                     if len(cur_data) and cur_data[0] == 'c':
@@ -241,18 +244,17 @@ class TCPReciv(Thread):
                         player_sprite.center_y = coords[1]
                         sprite_players_list.append(player_sprite)
                     if len(cur_data) and cur_data[0] == 'g':
-                        cur_data = cur_data.split(';')[1]
-                        cur_data = cur_data.split(':')
+                        print(cur_data)
+                        cur_data = cur_data.split(';', 1)[1]
+                        cur_data = cur_data.split(';')
+                        print(cur_data)
                         for i in range(0, len(sprite_players_list)):
                             if int(sprite_players_list[i].address.split(':')[1]) == int(cur_data[0]):
-                                if cur_data[1] == '+y':
-                                    sprite_players_list[i].center_y += 2
-                                if cur_data[1] == '-y':
-                                    sprite_players_list[i].center_y -= 2
-                                if cur_data[1] == '+x':
-                                    sprite_players_list[i].center_x += 2
-                                if cur_data[1] == '-x':
-                                    sprite_players_list[i].center_x -= 2
+                                x, y = cur_data[1].split(':')[0], cur_data[1].split(':')[1]
+                                angle = cur_data[2]
+                                sprite_players_list[i].angle = float(angle)
+                                sprite_players_list[i].center_x = float(x)
+                                sprite_players_list[i].center_y = float(y)
                 print()
             except socket.error:
                 break
