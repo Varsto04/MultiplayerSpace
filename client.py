@@ -174,6 +174,10 @@ class ClientGame(arcade.View):
         if symbol == arcade.key.S:
             client_input['bottom'] = 0
 
+    def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
+        if button & arcade.MOUSE_BUTTON_LEFT:
+            client_input['mouse'] = 1
+
     def server_update(self, delta_time):
         for player in players_list:
             if player.client_input['left'] == 1:
@@ -202,9 +206,10 @@ class TCPSend(Thread):
     def run(self):
         while True:
             self.send_data()
-            time.sleep(0.0005)
+            time.sleep(0.005)
 
     def send_data(self):
+        # отправление на сервер адреса, координат и угол клиента
         if 1 in client_input.values():
             print('Sending move...')
             #data = f'g;{user_socket};'

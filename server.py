@@ -42,7 +42,6 @@ class TCPReciv(Thread):
             try:
                 data = self.__client_socket.recv(BUFSIZE).decode('utf-8')
                 data = data.split(';', 1)
-                #print(data)
                 if data[0] == 'm':
                     msg = f'{self.__client_address[0]}:{self.__client_address[1]} {data[1]}'
                     for player in players_list:
@@ -50,22 +49,24 @@ class TCPReciv(Thread):
                 if data[0] == 'g':
                     data = data[1].split(';')
                     if data[3].find('1') == 0:
-                        msg = f'{data[0]};{data[1]};{float(data[2]) + 2}'
+                        msg = f'{data[0]};{data[1]};{float(data[2]) + 1}'
                     if data[3].find('1') == 2:
-                        msg = f'{data[0]};{data[1]};{float(data[2]) - 2}'
+                        msg = f'{data[0]};{data[1]};{float(data[2]) - 1}'
                     if data[3].find('1') == 4:
                         coords = data[1].split(':')
                         x, y = coords[0], coords[1]
                         angle = float(data[2])
                         change_x = -math.sin(math.radians(angle)) * 2
+                        change_x = round(change_x)
                         change_y = math.cos(math.radians(angle)) * 2
+                        change_y = round(change_y)
                         x = float(x) + change_x
                         y = float(y) + change_y
                         msg = f'{data[0]};{x}:{y};{data[2]}'
                     if data[3].find('1') == 6:
-                        pass
-                    for player in players_list:
-                        player.get_tcp_sock().sendall(f'g;{msg}'.encode())
+                        msg = f'{data[0]};{data[1]};{float(data[2])}'
+                for player in players_list:
+                    player.get_tcp_sock().sendall(f'g;{msg}'.encode())
             except socket.error as e:
                 break
         #remove_player(self.client_socket)
