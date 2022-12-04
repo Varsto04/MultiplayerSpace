@@ -17,19 +17,6 @@ DEFAULT_COORD = ((1800, 800), (1800, 1800), (2800, 800), (2800, 1800))
 #tcp_socket = None
 #udp_socket = None
 
-#if data[0] == 'g':
-    #if data[1].find('1') == 0:
-        #msg = '-x'
-    #if data[1].find('1') == 2:
-        #msg = '+x'
-    #if data[1].find('1') == 4:
-        #msg = '+y'
-    #if data[1].find('1') == 6:
-        #msg = '-y'
-
-    #for player in players_list:
-        #player.client_socket.sendall(f'g;{msg}'.encode())
-
 
 class TCPReciv(Thread):
     def __init__(self, client_socket):
@@ -48,11 +35,17 @@ class TCPReciv(Thread):
                         player.client_socket.sendall(f'm;{msg}'.encode())
                 if data[0] == 'g':
                     data = data[1].split(';')
-                    if data[3].find('1') == 0:
-                        msg = f'{data[0]};{data[1]};{float(data[2]) + 1}'
-                    if data[3].find('1') == 2:
-                        msg = f'{data[0]};{data[1]};{float(data[2]) - 1}'
-                    if data[3].find('1') == 4:
+                    move_input = data[3].split(':')
+                    messages = []
+                    if move_input[0] == '1':
+                        data[2] = float(data[2]) + 1
+                        #msg = f'{data[0]};{data[1]};{float(data[2]) + 1}'
+                        #messages.append(msg)
+                    elif move_input[1] == '1':
+                        data[2] = float(data[2]) - 1
+                        # msg = f'{data[0]};{data[1]};{float(data[2]) - 1}'
+                        #messages.append(msg)
+                    if move_input[2] == '1':
                         coords = data[1].split(':')
                         x, y = coords[0], coords[1]
                         angle = float(data[2])
@@ -62,12 +55,45 @@ class TCPReciv(Thread):
                         change_y = round(change_y)
                         x = float(x) + change_x
                         y = float(y) + change_y
-                        msg = f'{data[0]};{x}:{y};{data[2]}'
-                    if data[3].find('1') == 6:
+                        data[1] = str(x) + ':' + str(y)
+                        #msg = f'{data[0]};{x}:{y};{data[2]}'
+                        #messages.append(msg)
+                    if move_input[3] == '1':
                         msg = f'{data[0]};{data[1]};{float(data[2])}'
-                for player in players_list:
-                    player.get_tcp_sock().sendall(f'g;{msg}'.encode())
+                    msg = f'{data[0]};{data[1]};{float(data[2])}'
+                    #print(messages)
+                    print()
+                    #if data[3].find('1') == 0:
+                        #msg = f'{data[0]};{data[1]};{float(data[2]) + 1}'
+                    #if data[3].find('1') == 2:
+                        #msg = f'{data[0]};{data[1]};{float(data[2]) - 1}'
+                    #if data[3].find('1') == 4:
+                        #coords = data[1].split(':')
+                        #x, y = coords[0], coords[1]
+                    #     angle = float(data[2])
+                    #     change_x = -math.sin(math.radians(angle)) * 2
+                    #     change_x = round(change_x)
+                    #     change_y = math.cos(math.radians(angle)) * 2
+                    #     change_y = round(change_y)
+                    #     x = float(x) + change_x
+                    #     y = float(y) + change_y
+                    #     msg = f'{data[0]};{x}:{y};{data[2]}'
+                    # if data[3].find('1') == 6:
+                    #     msg = f'{data[0]};{data[1]};{float(data[2])}'
+                    for player in players_list:
+                        #for message in messages:
+                        player.get_tcp_sock().sendall(f'g;{msg}#'.encode())
+                if data[0] == 'z':
+                    data = data[1].split(';')
+                    print(data)
+                    if data[3].find('1') == 0:
+                        #data = data[1].split(';')
+                        print(data)
+                        msg = f'{data[0]};{data[1]};{float(data[2])}'
+                    for player in players_list:
+                        player.get_tcp_sock().sendall(f'z;{msg}#'.encode())
             except socket.error as e:
+                print(e)
                 break
         #remove_player(self.client_socket)
 
@@ -93,7 +119,7 @@ class TCPConnect(Thread):
 
                 players_list_size = len(players_list)
 
-                # отправление начальных координат всем игрокам
+                # отправление начальных координат всем клиентам
                 for i in range(0, players_list_size):
                     cur_player = players_list[i]
                     cur_player.get_tcp_sock().sendall(InteractionManager.coords_message(

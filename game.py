@@ -18,6 +18,10 @@ client_input = {
     'bottom': 0,
 }
 
+client_mouse = {
+    'left_mouse': 0,
+}
+
 server_output = {
     'x': 100,
     'y': 100

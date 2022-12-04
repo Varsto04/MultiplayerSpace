@@ -5,6 +5,7 @@ import socket
 from threading import Thread
 from interaction_manager import InteractionManager
 import space_station as space_station
+import bullet as bullet
 
 
 BUFSIZE = 1024
@@ -112,6 +113,9 @@ class ClientGame(arcade.View):
         self.npc_station_4.center_y = 2800
         self.npc_station_list.append(self.npc_station_4)
 
+        global bullet_list
+        bullet_list = arcade.SpriteList()
+
         arcade.set_background_color((0, 0, 0))
 
     def on_draw(self):
@@ -123,6 +127,7 @@ class ClientGame(arcade.View):
         sprite_players_list.draw()
         self.space_station_list.draw()
         self.npc_station_list.draw()
+        bullet_list.draw()
 
     def on_update(self, delta_time: float):
         self.center_camera_to_player()
@@ -136,6 +141,18 @@ class ClientGame(arcade.View):
         self.npc_station_2.angle += 0.125
         self.npc_station_3.angle += 0.125
         self.npc_station_4.angle += 0.125
+
+        bullet_list.update()
+
+        for bullet in bullet_list:
+            if bullet.center_x < 0:
+                bullet.remove_from_sprite_lists()
+            elif bullet.center_y < 0:
+                bullet.remove_from_sprite_lists()
+            elif bullet.center_x > 5000:
+                bullet.remove_from_sprite_lists()
+            elif bullet.center_y > 3000:
+                bullet.remove_from_sprite_lists()
 
     def center_camera_to_player(self):
         for i in range(0, len(sprite_players_list)):
@@ -163,6 +180,7 @@ class ClientGame(arcade.View):
             client_input['top'] = 1
         if symbol == arcade.key.S:
             client_input['bottom'] = 1
+        print(f'!!!{client_input}')
 
     def on_key_release(self, symbol: int, modifiers: int):
         if symbol == arcade.key.A:
@@ -176,18 +194,11 @@ class ClientGame(arcade.View):
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if button & arcade.MOUSE_BUTTON_LEFT:
-            client_input['mouse'] = 1
+            client_mouse['left_mouse'] = 1
 
-    def server_update(self, delta_time):
-        for player in players_list:
-            if player.client_input['left'] == 1:
-                player.server_output['x'] -= PLAYER_MOVE_SPEED
-            if player.client_input['right'] == 1:
-                player.server_output['x'] += PLAYER_MOVE_SPEED
-            if player.client_input['top'] == 1:
-                player.server_output['y'] += PLAYER_MOVE_SPEED
-            if player.client_input['bottom'] == 1:
-                player.server_output['y'] -= PLAYER_MOVE_SPEED
+    def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
+        if button & arcade.MOUSE_BUTTON_LEFT:
+            client_mouse['left_mouse'] = 0
 
 
 def remove_player(address):
@@ -206,12 +217,12 @@ class TCPSend(Thread):
     def run(self):
         while True:
             self.send_data()
-            time.sleep(0.005)
+            time.sleep(0.0005)
 
     def send_data(self):
         # отправление на сервер адреса, координат и угол клиента
         if 1 in client_input.values():
-            print('Sending move...')
+            #print('Sending move...')
             #data = f'g;{user_socket};'
             for i in range(0, len(sprite_players_list)):
                 if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
@@ -220,6 +231,20 @@ class TCPSend(Thread):
                     angle = sprite_players_list[i].angle
             data = f'g;{user_socket};{x}:{y};{angle};'
             data += InteractionManager.move_message(client_input)
+            data = data.encode()
+            try:
+                self.__tcp_socket.sendall(data)
+            except socket.error:
+                print('Socket error')
+
+        if 1 in client_mouse.values():
+            for i in range(0, len(sprite_players_list)):
+                if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
+                    x = sprite_players_list[i].center_x
+                    y = sprite_players_list[i].center_y
+                    angle = sprite_players_list[i].angle
+            data = f'z;{user_socket};{x}:{y};{angle};'
+            data += InteractionManager.move_message(client_mouse)
             data = data.encode()
             try:
                 self.__tcp_socket.sendall(data)
@@ -242,14 +267,27 @@ class TCPReciv(Thread):
                 for cur_data in data:
                     cur_data.strip()
                     if len(cur_data) and cur_data[0] == 'c':
-                        print(cur_data)
+                        #print(cur_data)
                         address, coords = InteractionManager.parse_coords_message(cur_data)
                         player_sprite = Player(address)
                         player_sprite.center_x = coords[0]
                         player_sprite.center_y = coords[1]
                         sprite_players_list.append(player_sprite)
                     if len(cur_data) and cur_data[0] == 'g':
+                        #print(cur_data)
+                        cur_data = cur_data.split(';', 1)[1]
+                        cur_data = cur_data.split(';')
                         print(cur_data)
+                        for i in range(0, len(sprite_players_list)):
+                            if int(sprite_players_list[i].address.split(':')[1]) == int(cur_data[0]):
+                                #print(cur_data)
+                                x, y = cur_data[1].split(':')[0], cur_data[1].split(':')[1]
+                                angle = cur_data[2]
+                                sprite_players_list[i].angle = float(angle)
+                                sprite_players_list[i].center_x = float(x)
+                                sprite_players_list[i].center_y = float(y)
+                    if len(cur_data) and cur_data[0] == 'z':
+                        #print(cur_data)
                         cur_data = cur_data.split(';', 1)[1]
                         cur_data = cur_data.split(';')
                         print(cur_data)
@@ -257,65 +295,31 @@ class TCPReciv(Thread):
                             if int(sprite_players_list[i].address.split(':')[1]) == int(cur_data[0]):
                                 x, y = cur_data[1].split(':')[0], cur_data[1].split(':')[1]
                                 angle = cur_data[2]
-                                sprite_players_list[i].angle = float(angle)
-                                sprite_players_list[i].center_x = float(x)
-                                sprite_players_list[i].center_y = float(y)
+
+                                self.bullet_sprite = bullet.Bullet()
+                                self.bullet_sprite.change_x = -math.sin(math.radians(float(angle))) * 3
+                                self.bullet_sprite.change_y = math.cos(math.radians(float(angle))) * 3
+
+                                self.bullet_sprite_2 = bullet.Bullet()
+                                self.bullet_sprite_2.change_x = -math.sin(math.radians(float(angle))) * 3
+                                self.bullet_sprite_2.change_y = math.cos(math.radians(float(angle))) * 3
+
+                                self.bullet_sprite.center_x = float(x)
+                                self.bullet_sprite.center_y = float(y)
+                                self.bullet_sprite_2.center_x = float(x) + 10
+                                self.bullet_sprite_2.center_y = float(y) + 10
+
+                                self.bullet_sprite.angle = float(angle) + 90
+                                self.bullet_sprite.update()
+
+                                self.bullet_sprite_2.angle = float(angle) + 90
+                                self.bullet_sprite_2.update()
+
+                                bullet_list.append(self.bullet_sprite)
+                                bullet_list.append(self.bullet_sprite_2)
                 print()
             except socket.error:
                 break
-
-
-# class UDPRecive(Thread):
-#     def __init__(self):
-#         super().__init__()
-#         self.work = True
-#
-#     def update_player(self, player, data):
-#         count = 2
-#         for key in player.server_output.keys():
-#             player.server_output[key] = int(data[count])
-#             count += 1
-#
-#         if len(player.server_output_buffer) == 2:
-#             player.server_output_buffer.pop(0)
-#         if game is not None:
-#             player.server_output_buffer.append((copy.copy(player.server_output), game.time))
-#
-#     def create_player(self, data):
-#         player_address = (data[0], int(data[1]))
-#         player = Player(player_address)
-#         players_list.append(player)
-#         self.update_player(player, data)
-#
-#     def run(self):
-#         while self.work:
-#             try:
-#                 data, address = udp_socket.recvfrom(BUFSIZE)
-#             except socket.error:
-#                 break
-#             data = data.decode('utf-8')
-#
-#             players = data.split(';;')
-#             for player_data in players:
-#                 player_data = player_data.split(';')
-#                 player_address = (player_data[0], int(player_data[1]))
-#                 player_exist = False
-#                 for _player in players_list:
-#                     if _player.address == player_address:
-#                         player_exist = True
-#                         self.update_player(_player, player_data)
-#                         break
-#                 if player_exist == False:
-#                     self.create_player(player_data)
-#
-#
-# def UDPSend(delta_time):
-#     if 1 in client_input.values():
-#         data = ''
-#         for values in client_input.values():
-#             data += str(values) + ';'
-#         data = data[:-1].encode()
-#         udp_socket.sendto(data, ADDRESS)
 
 
 def main():
