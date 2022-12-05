@@ -113,8 +113,8 @@ class ClientGame(arcade.View):
         self.npc_station_4.center_y = 2800
         self.npc_station_list.append(self.npc_station_4)
 
-        global bullet_list
-        bullet_list = arcade.SpriteList()
+        #global bullet_list
+        #bullet_list = arcade.SpriteList()
 
         arcade.set_background_color((0, 0, 0))
 
@@ -195,10 +195,14 @@ class ClientGame(arcade.View):
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if button & arcade.MOUSE_BUTTON_LEFT:
             client_mouse['left_mouse'] = 1
+            global bullet_k
+            bullet_k = 1
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         if button & arcade.MOUSE_BUTTON_LEFT:
             client_mouse['left_mouse'] = 0
+            global bullet_k
+            bullet_k = 0
 
 
 def remove_player(address):
@@ -217,7 +221,7 @@ class TCPSend(Thread):
     def run(self):
         while True:
             self.send_data()
-            time.sleep(0.0005)
+            time.sleep(0.00005)
 
     def send_data(self):
         # отправление на сервер адреса, координат и угол клиента
@@ -290,19 +294,20 @@ class TCPReciv(Thread):
                         #print(cur_data)
                         cur_data = cur_data.split(';', 1)[1]
                         cur_data = cur_data.split(';')
-                        print(cur_data)
+                        #print(cur_data)
+                        global bullet_k
                         for i in range(0, len(sprite_players_list)):
-                            if int(sprite_players_list[i].address.split(':')[1]) == int(cur_data[0]):
+                            if int(sprite_players_list[i].address.split(':')[1]) == int(cur_data[0]) and bullet_k < 2:
                                 x, y = cur_data[1].split(':')[0], cur_data[1].split(':')[1]
                                 angle = cur_data[2]
 
                                 self.bullet_sprite = bullet.Bullet()
-                                self.bullet_sprite.change_x = -math.sin(math.radians(float(angle))) * 3
-                                self.bullet_sprite.change_y = math.cos(math.radians(float(angle))) * 3
+                                self.bullet_sprite.change_x = -math.sin(math.radians(float(angle))) * 18
+                                self.bullet_sprite.change_y = math.cos(math.radians(float(angle))) * 18
 
                                 self.bullet_sprite_2 = bullet.Bullet()
-                                self.bullet_sprite_2.change_x = -math.sin(math.radians(float(angle))) * 3
-                                self.bullet_sprite_2.change_y = math.cos(math.radians(float(angle))) * 3
+                                self.bullet_sprite_2.change_x = -math.sin(math.radians(float(angle))) * 18
+                                self.bullet_sprite_2.change_y = math.cos(math.radians(float(angle))) * 18
 
                                 self.bullet_sprite.center_x = float(x)
                                 self.bullet_sprite.center_y = float(y)
@@ -315,8 +320,15 @@ class TCPReciv(Thread):
                                 self.bullet_sprite_2.angle = float(angle) + 90
                                 self.bullet_sprite_2.update()
 
+                                bullet_list_mutex.acquire()
                                 bullet_list.append(self.bullet_sprite)
+                                bullet_list_mutex.release()
+
+                                bullet_list_mutex.acquire()
                                 bullet_list.append(self.bullet_sprite_2)
+                                bullet_list_mutex.release()
+
+                                bullet_k += 1
                 print()
             except socket.error:
                 break

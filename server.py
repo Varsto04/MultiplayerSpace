@@ -5,7 +5,6 @@ from game import *
 import socket
 from threading import Thread
 from interaction_manager import InteractionManager
-
 import schedule
 
 BUFSIZE = 1024
@@ -38,20 +37,20 @@ class TCPReciv(Thread):
                     move_input = data[3].split(':')
                     messages = []
                     if move_input[0] == '1':
-                        data[2] = float(data[2]) + 1
+                        data[2] = float(data[2]) + 0.75
                         #msg = f'{data[0]};{data[1]};{float(data[2]) + 1}'
                         #messages.append(msg)
                     elif move_input[1] == '1':
-                        data[2] = float(data[2]) - 1
+                        data[2] = float(data[2]) - 0.75
                         # msg = f'{data[0]};{data[1]};{float(data[2]) - 1}'
                         #messages.append(msg)
                     if move_input[2] == '1':
                         coords = data[1].split(':')
                         x, y = coords[0], coords[1]
                         angle = float(data[2])
-                        change_x = -math.sin(math.radians(angle)) * 2
+                        change_x = -math.sin(math.radians(angle)) * 1.5
                         change_x = round(change_x)
-                        change_y = math.cos(math.radians(angle)) * 2
+                        change_y = math.cos(math.radians(angle)) * 1.5
                         change_y = round(change_y)
                         x = float(x) + change_x
                         y = float(y) + change_y
