@@ -35,52 +35,37 @@ class TCPReciv(Thread):
                 if data[0] == 'g':
                     data = data[1].split(';')
                     move_input = data[3].split(':')
-                    messages = []
+                    # if self.player_sprite.center_x < 35:
+                    #     self.player_sprite.center_x += 10
+                    # elif self.player_sprite.center_y < 35:
+                    #     self.player_sprite.center_y += 10
+                    # elif self.player_sprite.center_y > 2965:
+                    #     self.player_sprite.center_y -= 10
+                    # elif self.player_sprite.center_x > 4965:
+                    #     self.player_sprite.center_x -= 10
                     if move_input[0] == '1':
-                        data[2] = float(data[2]) + 0.75
-                        #msg = f'{data[0]};{data[1]};{float(data[2]) + 1}'
-                        #messages.append(msg)
+                        data[2] = float(data[2]) + 1
                     elif move_input[1] == '1':
-                        data[2] = float(data[2]) - 0.75
-                        # msg = f'{data[0]};{data[1]};{float(data[2]) - 1}'
-                        #messages.append(msg)
+                        data[2] = float(data[2]) - 1
                     if move_input[2] == '1':
                         coords = data[1].split(':')
                         x, y = coords[0], coords[1]
                         angle = float(data[2])
-                        change_x = -math.sin(math.radians(angle)) * 1.5
+
+                        change_x = -math.sin(math.radians(angle)) * 2
                         change_x = round(change_x)
-                        change_y = math.cos(math.radians(angle)) * 1.5
+                        change_y = math.cos(math.radians(angle)) * 2
                         change_y = round(change_y)
+
                         x = float(x) + change_x
                         y = float(y) + change_y
+
                         data[1] = str(x) + ':' + str(y)
-                        #msg = f'{data[0]};{x}:{y};{data[2]}'
-                        #messages.append(msg)
                     if move_input[3] == '1':
                         msg = f'{data[0]};{data[1]};{float(data[2])}'
                     msg = f'{data[0]};{data[1]};{float(data[2])}'
-                    #print(messages)
                     print()
-                    #if data[3].find('1') == 0:
-                        #msg = f'{data[0]};{data[1]};{float(data[2]) + 1}'
-                    #if data[3].find('1') == 2:
-                        #msg = f'{data[0]};{data[1]};{float(data[2]) - 1}'
-                    #if data[3].find('1') == 4:
-                        #coords = data[1].split(':')
-                        #x, y = coords[0], coords[1]
-                    #     angle = float(data[2])
-                    #     change_x = -math.sin(math.radians(angle)) * 2
-                    #     change_x = round(change_x)
-                    #     change_y = math.cos(math.radians(angle)) * 2
-                    #     change_y = round(change_y)
-                    #     x = float(x) + change_x
-                    #     y = float(y) + change_y
-                    #     msg = f'{data[0]};{x}:{y};{data[2]}'
-                    # if data[3].find('1') == 6:
-                    #     msg = f'{data[0]};{data[1]};{float(data[2])}'
                     for player in players_list:
-                        #for message in messages:
                         player.get_tcp_sock().sendall(f'g;{msg}#'.encode())
                 if data[0] == 'z':
                     data = data[1].split(';')
@@ -197,57 +182,10 @@ class ServerPlayer:
         return self.__client_socket
 
 
-# class UDPRecive(Thread):
-#     def __init__(self):
-#         super().__init__()
-#
-#     def run(self):
-#         while True:
-#             data, address = udp_socket.recvfrom(BUFSIZE)
-#             data = data.decode('utf-8')
-#             data = data.split(';')
-#             for player in players_list:
-#                 if player.address == address:
-#                     count = 0
-#                     for key in player.client_input.keys():
-#                         player.client_input[key] = int(data[count])
-#                         count += 1
-#                     print(f'{player.address[0]}:{player.address[1]} {player.client_input} {player.server_output}')
-#                     break
-
-
-# def UDPSend():
-#     print('UDPSend')
-#     data = ''
-#     for player in players_list:
-#         for key in player.client_input.keys():
-#             player.client_input[key] = 0
-#         data += player.address[0] + ';' + str(player.address[1]) + ';'
-#         for value in player.server_output.values():
-#             data += str(value) + ';'
-#         data += ';'
-#     data = data[:-2].encode()
-#     for player in players_list:
-#         udp_socket.sendto(data, player.address)
-
 def main():
     server = SpaceGameServer()
     server.init()
     server.run()
-    #udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    #udp_socket.bind(ADDRESS)
-
-    #game = Game()
-
-    #udp_reciver = UDPRecive()
-    #udp_reciver.start()
-
-    #tcp_connector = TCPConnect()
-    #tcp_connector.start()
-
-    # schedule.every(1).seconds.do(UDPSend)
-    # arcade.schedule(game.server_update, 1/60)
-    # arcade.schedule(UDPSend, SENDING_SPEED)
     arcade.run()
 
 
