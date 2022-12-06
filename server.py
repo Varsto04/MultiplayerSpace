@@ -28,6 +28,7 @@ class TCPReciv(Thread):
             try:
                 data = self.__client_socket.recv(BUFSIZE).decode('utf-8')
                 data = data.split(';', 1)
+                print(data)
                 if data[0] == 'm':
                     msg = f'{self.__client_address[0]}:{self.__client_address[1]} {data[1]}'
                     for player in players_list:

@@ -113,6 +113,12 @@ class ClientGame(arcade.View):
         self.npc_station_4.center_y = 2800
         self.npc_station_list.append(self.npc_station_4)
 
+        #global bullet_k
+        #bullet_k = 1
+
+        global bullet_flag
+        bullet_flag = True
+
         #global bullet_list
         #bullet_list = arcade.SpriteList()
 
@@ -191,7 +197,6 @@ class ClientGame(arcade.View):
             client_input['top'] = 1
         if symbol == arcade.key.S:
             client_input['bottom'] = 1
-        print(f'!!!{client_input}')
 
     def on_key_release(self, symbol: int, modifiers: int):
         if symbol == arcade.key.A:
@@ -206,14 +211,12 @@ class ClientGame(arcade.View):
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if button & arcade.MOUSE_BUTTON_LEFT:
             client_mouse['left_mouse'] = 1
-            global bullet_k
-            bullet_k = 1
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         if button & arcade.MOUSE_BUTTON_LEFT:
             client_mouse['left_mouse'] = 0
-            global bullet_k
-            bullet_k = 0
+            global bullet_flag
+            bullet_flag = True
 
 
 def remove_player(address):
@@ -252,7 +255,8 @@ class TCPSend(Thread):
             except socket.error:
                 print('Socket error')
 
-        if 1 in client_mouse.values():
+        global bullet_flag
+        if 1 in client_mouse.values() and bullet_flag:
             for i in range(0, len(sprite_players_list)):
                 if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
                     x = sprite_players_list[i].center_x
@@ -263,6 +267,7 @@ class TCPSend(Thread):
             data = data.encode()
             try:
                 self.__tcp_socket.sendall(data)
+                bullet_flag = False
             except socket.error:
                 print('Socket error')
 
@@ -306,91 +311,85 @@ class TCPReciv(Thread):
                         cur_data = cur_data.split(';', 1)[1]
                         cur_data = cur_data.split(';')
                         #print(cur_data)
-                        global bullet_k
-                        #for i in range(0, len(sprite_players_list)):
-                            #if int(sprite_players_list[i].address.split(':')[1]) == int(cur_data[0]) and bullet_k < 2:
-                        if bullet_k < 2:
-                            x, y = cur_data[1].split(':')[0], cur_data[1].split(':')[1]
-                            angle = cur_data[2]
+                        x, y = cur_data[1].split(':')[0], cur_data[1].split(':')[1]
+                        angle = cur_data[2]
 
-                            x = float(x)
-                            y = float(y)
-                            angle = float(angle)
+                        x = float(x)
+                        y = float(y)
+                        angle = float(angle)
 
-                            self.bullet_sprite = bullet.Bullet()
-                            self.bullet_sprite.change_x = -math.sin(math.radians(angle)) * 22
-                            self.bullet_sprite.change_y = math.cos(math.radians(float(angle))) * 22
+                        self.bullet_sprite = bullet.Bullet()
+                        self.bullet_sprite.change_x = -math.sin(math.radians(angle)) * 22
+                        self.bullet_sprite.change_y = math.cos(math.radians(float(angle))) * 22
 
-                            self.bullet_sprite_2 = bullet.Bullet()
-                            self.bullet_sprite_2.change_x = -math.sin(math.radians(angle)) * 22
-                            self.bullet_sprite_2.change_y = math.cos(math.radians(angle)) * 22
+                        self.bullet_sprite_2 = bullet.Bullet()
+                        self.bullet_sprite_2.change_x = -math.sin(math.radians(angle)) * 22
+                        self.bullet_sprite_2.change_y = math.cos(math.radians(angle)) * 22
 
-                            self.bullet_sprite.center_x = x
+                        self.bullet_sprite.center_x = x
+                        self.bullet_sprite.center_y = y
+                        self.bullet_sprite_2.center_x = x + 10
+                        self.bullet_sprite_2.center_y = y + 10
+
+                        if (angle >= 0) and (angle <= 25):
+                            self.bullet_sprite.center_x = x - 15
                             self.bullet_sprite.center_y = y
+                            self.bullet_sprite_2.center_x = x + 15
+                            self.bullet_sprite_2.center_y = y
+                        elif (angle > 25) and (angle < 65):
+                            self.bullet_sprite.center_x = x - 10
+                            self.bullet_sprite.center_y = y - 10
+                            self.bullet_sprite_2.center_x = x - 10
+                            self.bullet_sprite_2.center_y = y + 30
+                        elif (angle >= 65) and (angle <= 115):
+                            self.bullet_sprite.center_x = x
+                            self.bullet_sprite.center_y = y + 15
+                            self.bullet_sprite_2.center_x = x
+                            self.bullet_sprite_2.center_y = y - 15
+                        elif (angle > 115) and (angle < 155):
+                            self.bullet_sprite.center_x = x - 10
+                            self.bullet_sprite.center_y = y + 10
+                            self.bullet_sprite_2.center_x = x - 10
+                            self.bullet_sprite_2.center_y = y - 30
+                        elif (angle >= 155) and (angle <= 205):
+                            self.bullet_sprite.center_x = x + 15
+                            self.bullet_sprite.center_y = y
+                            self.bullet_sprite_2.center_x = x - 15
+                            self.bullet_sprite_2.center_y = y
+                        elif (angle > 205) and (angle < 245):
+                            self.bullet_sprite.center_x = x - 10
+                            self.bullet_sprite.center_y = y - 10
                             self.bullet_sprite_2.center_x = x + 10
-                            self.bullet_sprite_2.center_y = y + 10
+                            self.bullet_sprite_2.center_y = y + 18
+                        elif (angle >= 245) and (angle <= 295):
+                            self.bullet_sprite.center_x = x
+                            self.bullet_sprite.center_y = y - 15
+                            self.bullet_sprite_2.center_x = x
+                            self.bullet_sprite_2.center_y = y + 15
+                        elif (angle > 295) and (angle < 335):
+                            self.bullet_sprite.center_x = x + 10
+                            self.bullet_sprite.center_y = y - 10
+                            self.bullet_sprite_2.center_x = x + 10
+                            self.bullet_sprite_2.center_y = y + 28
+                        elif (angle >= 335) and (angle <= 360):
+                            self.bullet_sprite.center_x = x - 15
+                            self.bullet_sprite.center_y = y
+                            self.bullet_sprite_2.center_x = x + 15
+                            self.bullet_sprite_2.center_y = y
 
-                            if (angle >= 0) and (angle <= 25):
-                                self.bullet_sprite.center_x = x - 15
-                                self.bullet_sprite.center_y = y
-                                self.bullet_sprite_2.center_x = x + 15
-                                self.bullet_sprite_2.center_y = y
-                            elif (angle > 25) and (angle < 65):
-                                self.bullet_sprite.center_x = x - 10
-                                self.bullet_sprite.center_y = y - 10
-                                self.bullet_sprite_2.center_x = x - 10
-                                self.bullet_sprite_2.center_y = y + 30
-                            elif (angle >= 65) and (angle <= 115):
-                                self.bullet_sprite.center_x = x
-                                self.bullet_sprite.center_y = y + 15
-                                self.bullet_sprite_2.center_x = x
-                                self.bullet_sprite_2.center_y = y - 15
-                            elif (angle > 115) and (angle < 155):
-                                self.bullet_sprite.center_x = x - 10
-                                self.bullet_sprite.center_y = y + 10
-                                self.bullet_sprite_2.center_x = x - 10
-                                self.bullet_sprite_2.center_y = y - 30
-                            elif (angle >= 155) and (angle <= 205):
-                                self.bullet_sprite.center_x = x + 15
-                                self.bullet_sprite.center_y = y
-                                self.bullet_sprite_2.center_x = x - 15
-                                self.bullet_sprite_2.center_y = y
-                            elif (angle > 205) and (angle < 245):
-                                self.bullet_sprite.center_x = x - 10
-                                self.bullet_sprite.center_y = y - 10
-                                self.bullet_sprite_2.center_x = x + 10
-                                self.bullet_sprite_2.center_y = y + 18
-                            elif (angle >= 245) and (angle <= 295):
-                                self.bullet_sprite.center_x = x
-                                self.bullet_sprite.center_y = y - 15
-                                self.bullet_sprite_2.center_x = x
-                                self.bullet_sprite_2.center_y = y + 15
-                            elif (angle > 295) and (angle < 335):
-                                self.bullet_sprite.center_x = x + 10
-                                self.bullet_sprite.center_y = y - 10
-                                self.bullet_sprite_2.center_x = x + 10
-                                self.bullet_sprite_2.center_y = y + 28
-                            elif (angle >= 335) and (angle <= 360):
-                                self.bullet_sprite.center_x = x - 15
-                                self.bullet_sprite.center_y = y
-                                self.bullet_sprite_2.center_x = x + 15
-                                self.bullet_sprite_2.center_y = y
+                        self.bullet_sprite.angle = angle + 90
+                        self.bullet_sprite.update()
 
-                            self.bullet_sprite.angle = angle + 90
-                            self.bullet_sprite.update()
+                        self.bullet_sprite_2.angle = angle + 90
+                        self.bullet_sprite_2.update()
 
-                            self.bullet_sprite_2.angle = angle + 90
-                            self.bullet_sprite_2.update()
+                        bullet_list_mutex.acquire()
+                        bullet_list.append(self.bullet_sprite)
+                        bullet_list_mutex.release()
 
-                            bullet_list_mutex.acquire()
-                            bullet_list.append(self.bullet_sprite)
-                            bullet_list_mutex.release()
-
-                            bullet_list_mutex.acquire()
-                            bullet_list.append(self.bullet_sprite_2)
-                            bullet_list_mutex.release()
-
-                            bullet_k += 1
+                        bullet_list_mutex.acquire()
+                        bullet_list.append(self.bullet_sprite_2)
+                        bullet_list_mutex.release()
                 print()
             except socket.error:
                 break
