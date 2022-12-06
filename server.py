@@ -58,8 +58,21 @@ class TCPReciv(Thread):
                         change_y = math.cos(math.radians(angle)) * 2
                         change_y = round(change_y)
 
-                        x = float(x) + change_x
-                        y = float(y) + change_y
+                        if float(x) < 25:
+                            x = float(x)
+                        elif float(x) > 4975:
+                            x = float(x)
+                        else:
+                            x = float(x) + change_x
+                        #x = float(x) + change_x
+
+                        if float(y) < 25:
+                            y = float(y)
+                        elif float(y) > 2975:
+                            y = float(y)
+                        else:
+                            y = float(y) + change_y
+                        #y = float(y) + change_y
 
                         data[1] = str(x) + ':' + str(y)
                     if move_input[3] == '1':

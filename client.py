@@ -170,6 +170,17 @@ class ClientGame(arcade.View):
                         while sprite_players_list[i].angle <= 0:
                             sprite_players_list[i].angle += 360
 
+        for i in range(0, len(sprite_players_list)):
+            if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
+                if sprite_players_list[i].center_x < 45:
+                    sprite_players_list[i].center_x += 20
+                elif sprite_players_list[i].center_y < 45:
+                    sprite_players_list[i].center_y += 20
+                elif sprite_players_list[i].center_y > 2955:
+                    sprite_players_list[i].center_y -= 20
+                elif sprite_players_list[i].center_x > 4955:
+                    sprite_players_list[i].center_x -= 20
+
 
     def center_camera_to_player(self):
         for i in range(0, len(sprite_players_list)):
