@@ -46,6 +46,11 @@ sprite_players_list = arcade.SpriteList()
 bullet_list = arcade.SpriteList()
 bullet_list_mutex = Lock()
 
+bullet_list_client = arcade.SpriteList()
+bullet_list_client_mutex = Lock()
+
+bullet_remove = Lock()
+
 
 class Player(arcade.Sprite):
     def __init__(self, address):

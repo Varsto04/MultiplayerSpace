@@ -134,6 +134,7 @@ class ClientGame(arcade.View):
         self.space_station_list.draw()
         self.npc_station_list.draw()
         bullet_list.draw()
+        bullet_list_client.draw()
 
     def on_update(self, delta_time: float):
         self.center_camera_to_player()
@@ -149,6 +150,7 @@ class ClientGame(arcade.View):
         self.npc_station_4.angle += 0.125
 
         bullet_list.update()
+        bullet_list_client.update()
 
         for bullet in bullet_list:
             if bullet.center_x < 0:
@@ -159,6 +161,16 @@ class ClientGame(arcade.View):
                 bullet.remove_from_sprite_lists()
             elif bullet.center_y > 3000:
                 bullet.remove_from_sprite_lists()
+
+        for bullet_client in bullet_list_client:
+            if bullet_client.center_x < 0:
+                bullet_client.remove_from_sprite_lists()
+            elif bullet_client.center_y < 0:
+                bullet_client.remove_from_sprite_lists()
+            elif bullet_client.center_x > 5000:
+                bullet_client.remove_from_sprite_lists()
+            elif bullet_client.center_y > 3000:
+                bullet_client.remove_from_sprite_lists()
 
         for i in range(0, len(sprite_players_list)):
             if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
@@ -180,6 +192,24 @@ class ClientGame(arcade.View):
                     sprite_players_list[i].center_y -= 20
                 elif sprite_players_list[i].center_x > 4955:
                     sprite_players_list[i].center_x -= 20
+
+        for bullet in bullet_list:
+            for i in range(0, len(sprite_players_list)):
+                if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
+                    collision_player_bullet = arcade.check_for_collision(bullet, sprite_players_list[i])
+                    if collision_player_bullet:
+                        bullet_remove.acquire()
+                        bullet.remove_from_sprite_lists()
+                        bullet_remove.release()
+
+        for bullet_client in bullet_list_client:
+            for i in range(0, len(sprite_players_list)):
+                if int(sprite_players_list[i].address.split(':')[1]) != int(user_socket):
+                    collision_player_client_bullet = arcade.check_for_collision(bullet_client, sprite_players_list[i])
+                    if collision_player_client_bullet:
+                        bullet_remove.acquire()
+                        bullet_client.remove_from_sprite_lists()
+                        bullet_remove.release()
 
 
     def center_camera_to_player(self):
@@ -394,13 +424,23 @@ class TCPReciv(Thread):
                         self.bullet_sprite_2.angle = angle + 90
                         self.bullet_sprite_2.update()
 
-                        bullet_list_mutex.acquire()
-                        bullet_list.append(self.bullet_sprite)
-                        bullet_list_mutex.release()
+                        if int(cur_data[0]) == int(user_socket):
+                            bullet_list_client_mutex.acquire()
+                            bullet_list_client.append(self.bullet_sprite)
+                            bullet_list_client_mutex.release()
 
-                        bullet_list_mutex.acquire()
-                        bullet_list.append(self.bullet_sprite_2)
-                        bullet_list_mutex.release()
+                            bullet_list_client_mutex.acquire()
+                            bullet_list_client.append(self.bullet_sprite_2)
+                            bullet_list_client_mutex.release()
+
+                        else:
+                            bullet_list_mutex.acquire()
+                            bullet_list.append(self.bullet_sprite)
+                            bullet_list_mutex.release()
+
+                            bullet_list_mutex.acquire()
+                            bullet_list.append(self.bullet_sprite_2)
+                            bullet_list_mutex.release()
                 print()
             except socket.error:
                 break
