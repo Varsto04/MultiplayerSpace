@@ -49,7 +49,9 @@ bullet_list_mutex = Lock()
 bullet_list_client = arcade.SpriteList()
 bullet_list_client_mutex = Lock()
 
-bullet_remove = Lock()
+explosion_list_mutex = Lock()
+
+#bullet_remove = Lock()
 
 
 class Player(arcade.Sprite):
@@ -62,6 +64,7 @@ class Player(arcade.Sprite):
         self.thrust = 2
         self.rot_speed = 2
         self.speed = 5
+        self.health = 100
         self.address = address  # server address
         self.server_output_buffer = []
 

@@ -6,6 +6,8 @@ from threading import Thread
 from interaction_manager import InteractionManager
 import space_station as space_station
 import bullet as bullet
+import server as server
+import explosion as expl
 
 
 BUFSIZE = 1024
@@ -113,6 +115,15 @@ class ClientGame(arcade.View):
         self.npc_station_4.center_y = 2800
         self.npc_station_list.append(self.npc_station_4)
 
+        self.explosion_texture_list = []
+        columns = 16
+        count = 60
+        sprite_width = 256
+        sprite_height = 256
+        file_name = ":resources:images/spritesheets/explosion.png"
+        self.explosion_texture_list = arcade.load_spritesheet(file_name, sprite_width, sprite_height, columns, count)
+        self.explosions_list = arcade.SpriteList()
+
         #global bullet_k
         #bullet_k = 1
 
@@ -135,6 +146,7 @@ class ClientGame(arcade.View):
         self.npc_station_list.draw()
         bullet_list.draw()
         bullet_list_client.draw()
+        self.explosions_list.draw()
 
     def on_update(self, delta_time: float):
         self.center_camera_to_player()
@@ -198,18 +210,45 @@ class ClientGame(arcade.View):
                 if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
                     collision_player_bullet = arcade.check_for_collision(bullet, sprite_players_list[i])
                     if collision_player_bullet:
-                        bullet_remove.acquire()
+                        #bullet_remove.acquire()
                         bullet.remove_from_sprite_lists()
-                        bullet_remove.release()
+                        #bullet_remove.release()
+                        sprite_players_list[i].health -= 5
 
         for bullet_client in bullet_list_client:
             for i in range(0, len(sprite_players_list)):
                 if int(sprite_players_list[i].address.split(':')[1]) != int(user_socket):
                     collision_player_client_bullet = arcade.check_for_collision(bullet_client, sprite_players_list[i])
                     if collision_player_client_bullet:
-                        bullet_remove.acquire()
+                        #bullet_remove.acquire()
                         bullet_client.remove_from_sprite_lists()
-                        bullet_remove.release()
+                        #bullet_remove.release()
+                        sprite_players_list[i].health -= 5
+
+        for i in range(0, len(sprite_players_list)):
+            if sprite_players_list[i].health < 0:
+                explosion = expl.Explosion(self.explosion_texture_list)
+                explosion.center_x = sprite_players_list[i].center_x
+                explosion.center_y = sprite_players_list[i].center_y
+                explosion.update()
+                explosion_list_mutex.acquire()
+                self.explosions_list.append(explosion)
+                explosion_list_mutex.release()
+                if i == 0:
+                    sprite_players_list[i].center_x = server.DEFAULT_COORD[0][0]
+                    sprite_players_list[i].center_y = server.DEFAULT_COORD[0][1]
+                elif i == 1:
+                    sprite_players_list[i].center_x = server.DEFAULT_COORD[1][0]
+                    sprite_players_list[i].center_y = server.DEFAULT_COORD[1][1]
+                elif i == 2:
+                    sprite_players_list[i].center_x = server.DEFAULT_COORD[2][0]
+                    sprite_players_list[i].center_y = server.DEFAULT_COORD[2][1]
+                elif i == 3:
+                    sprite_players_list[i].center_x = server.DEFAULT_COORD[3][0]
+                    sprite_players_list[i].center_y = server.DEFAULT_COORD[3][1]
+                sprite_players_list[i].health = 100
+
+        self.explosions_list.update()
 
 
     def center_camera_to_player(self):

@@ -45,9 +45,9 @@ class TCPReciv(Thread):
                     # elif self.player_sprite.center_x > 4965:
                     #     self.player_sprite.center_x -= 10
                     if move_input[0] == '1':
-                        data[2] = float(data[2]) + 1
+                        data[2] = float(data[2]) + 0.6
                     elif move_input[1] == '1':
-                        data[2] = float(data[2]) - 1
+                        data[2] = float(data[2]) - 0.6
                     if move_input[2] == '1':
                         coords = data[1].split(':')
                         x, y = coords[0], coords[1]
