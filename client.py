@@ -226,6 +226,25 @@ class ClientGame(arcade.View):
                         sprite_players_list[i].health -= 5
 
         for i in range(0, len(sprite_players_list)):
+            for j in range(0, len(sprite_players_list)):
+                collision_players = arcade.check_for_collision(sprite_players_list[j], sprite_players_list[i])
+                if collision_players and i != j:
+                    sprite_players_list[j].health -= 25
+                    sprite_players_list[i].health -= 25
+                    explosion = expl.Explosion(self.explosion_texture_list)
+                    explosion.scale = 3
+                    explosion.center_x = sprite_players_list[i].center_x
+                    explosion.center_y = sprite_players_list[i].center_y
+                    explosion.update()
+                    explosion_list_mutex.acquire()
+                    self.explosions_list.append(explosion)
+                    explosion_list_mutex.release()
+                    sprite_players_list[i].center_x -= 80
+                    sprite_players_list[i].center_y -= 80
+                    sprite_players_list[j].center_x += 80
+                    sprite_players_list[j].center_y += 80
+
+        for i in range(0, len(sprite_players_list)):
             if sprite_players_list[i].health < 0:
                 explosion = expl.Explosion(self.explosion_texture_list)
                 explosion.center_x = sprite_players_list[i].center_x
@@ -248,8 +267,21 @@ class ClientGame(arcade.View):
                     sprite_players_list[i].center_y = server.DEFAULT_COORD[3][1]
                 sprite_players_list[i].health = 100
 
-        self.explosions_list.update()
+        for i in range(0, len(sprite_players_list)):
+            if i == 0:
+                collision_player_station = arcade.check_for_collision(sprite_players_list[i], self.space_station)
+            elif i == 1:
+                collision_player_station = arcade.check_for_collision(sprite_players_list[i], self.space_station_2)
+            elif i == 2:
+                collision_player_station = arcade.check_for_collision(sprite_players_list[i], self.space_station_3)
+            elif i == 3:
+                collision_player_station = arcade.check_for_collision(sprite_players_list[i], self.space_station_4)
 
+            if collision_player_station and sprite_players_list[i].health != 100:
+                sprite_players_list[i].health += 0.125
+                print(sprite_players_list[i].health)
+
+        self.explosions_list.update()
 
     def center_camera_to_player(self):
         for i in range(0, len(sprite_players_list)):

@@ -61,9 +61,10 @@ class Player(arcade.Sprite):
         self.server_output = copy.copy(server_output)
         self.interpolate_output = copy.copy(interpolate_output)
         self.player_stats = copy.copy(player_stats)
-        self.thrust = 2
-        self.rot_speed = 2
-        self.speed = 5
+        #self.thrust = 2
+        #self.rot_speed = 2
+        #self.speed = 5
+        self.bullets_ammunition = 100
         self.health = 100
         self.address = address  # server address
         self.server_output_buffer = []
