@@ -130,6 +130,8 @@ class ClientGame(arcade.View):
         global bullet_flag
         bullet_flag = True
 
+        self.sound_explosion = arcade.Sound(file_name="Sounds/explosion09.wav")
+
         #global bullet_list
         #bullet_list = arcade.SpriteList()
 
@@ -239,6 +241,7 @@ class ClientGame(arcade.View):
                     explosion_list_mutex.acquire()
                     self.explosions_list.append(explosion)
                     explosion_list_mutex.release()
+                    #arcade.play_sound(self.sound_explosion, volume=0.1)
                     sprite_players_list[i].center_x -= 80
                     sprite_players_list[i].center_y -= 80
                     sprite_players_list[j].center_x += 80
@@ -281,6 +284,27 @@ class ClientGame(arcade.View):
                 sprite_players_list[i].health += 0.125
                 print(sprite_players_list[i].health)
 
+        for i in range(0, len(sprite_players_list)):
+            collision_players_npcstation = arcade.check_for_collision(sprite_players_list[i], self.npc_station)
+            if collision_players_npcstation and sprite_players_list[i].bullets_ammunition != 100:
+                sprite_players_list[i].bullets_ammunition += 1
+                print(sprite_players_list[i].bullets_ammunition)
+
+            collision_players_npcstation2 = arcade.check_for_collision(sprite_players_list[i], self.npc_station_2)
+            if collision_players_npcstation2 and sprite_players_list[i].bullets_ammunition != 100:
+                sprite_players_list[i].bullets_ammunition += 1
+                print(sprite_players_list[i].bullets_ammunition)
+
+            collision_players_npcstation3 = arcade.check_for_collision(sprite_players_list[i], self.npc_station_3)
+            if collision_players_npcstation3 and sprite_players_list[i].bullets_ammunition != 100:
+                sprite_players_list[i].bullets_ammunition += 1
+                print(sprite_players_list[i].bullets_ammunition)
+
+            collision_players_npcstation4 = arcade.check_for_collision(sprite_players_list[i], self.npc_station_4)
+            if collision_players_npcstation4 and sprite_players_list[i].bullets_ammunition != 100:
+                sprite_players_list[i].bullets_ammunition += 1
+                print(sprite_players_list[i].bullets_ammunition)
+
         self.explosions_list.update()
 
     def center_camera_to_player(self):
@@ -322,7 +346,11 @@ class ClientGame(arcade.View):
 
     def on_mouse_press(self, x: int, y: int, button: int, modifiers: int):
         if button & arcade.MOUSE_BUTTON_LEFT:
-            client_mouse['left_mouse'] = 1
+            for i in range(0, len(sprite_players_list)):
+                if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket) and \
+                        sprite_players_list[i].bullets_ammunition != 0:
+                    client_mouse['left_mouse'] = 1
+                    sprite_players_list[i].bullets_ammunition -= 2
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         if button & arcade.MOUSE_BUTTON_LEFT:
@@ -389,6 +417,7 @@ class TCPReciv(Thread):
         super().__init__()
         self.__tcp_socket = tcp_sock
         self.work = True
+        self.sound_laser = arcade.Sound(file_name=":resources:sounds/laser1.mp3")
 
     def run(self):
         while self.work:
@@ -512,6 +541,7 @@ class TCPReciv(Thread):
                             bullet_list_mutex.acquire()
                             bullet_list.append(self.bullet_sprite_2)
                             bullet_list_mutex.release()
+                        arcade.play_sound(self.sound_laser, volume=1)
                 print()
             except socket.error:
                 break
