@@ -383,6 +383,15 @@ class ClientGame(arcade.View):
                 sprite_players_list[i].flag_bullets = True
                 sprite_players_list[i].shot_counter = 0
 
+        for i in range(0, len(sprite_players_list)):
+            collision_player_icon_rocket = arcade.check_for_collision(sprite_players_list[i], self.icon_rocket)
+            if collision_player_icon_rocket:
+                sprite_players_list[i].flag_rocket = True
+
+            collision_player_icon_rocket2 = arcade.check_for_collision(sprite_players_list[i], self.icon_rocket_2)
+            if collision_player_icon_rocket2:
+                sprite_players_list[i].flag_rocket = True
+
         self.explosions_list.update()
 
     def center_camera_to_player(self):
@@ -439,8 +448,9 @@ class ClientGame(arcade.View):
             for i in range(0, len(sprite_players_list)):
                 if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket) and \
                         sprite_players_list[i].bullets_ammunition > 3:
-                    client_mouse['right_mouse'] = 1
-                    sprite_players_list[i].bullets_ammunition -= 1
+                    if sprite_players_list[i].flag_rocket:
+                        client_mouse['right_mouse'] = 1
+                        sprite_players_list[i].bullets_ammunition -= 1
 
     def on_mouse_release(self, x: int, y: int, button: int, modifiers: int):
         global bullet_flag
@@ -451,6 +461,9 @@ class ClientGame(arcade.View):
         if button & arcade.MOUSE_BUTTON_RIGHT:
             client_mouse['right_mouse'] = 0
             bullet_flag = True
+            for i in range(0, len(sprite_players_list)):
+                if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
+                    sprite_players_list[i].flag_rocket = False
 
 
 def remove_player(address):
@@ -729,22 +742,25 @@ class TCPReciv(Thread):
                                 bullet_list_mutex.release()
                             #arcade.play_sound(self.sound_laser, volume=1)
                         if shot_type[1] == '1':
-                            self.rocket_sprite = rocket.Rocket()
-                            self.rocket_sprite.change_x = -math.sin(math.radians(angle)) * 11
-                            self.rocket_sprite.change_y = math.cos(math.radians(angle)) * 11
+                            for i in range(0, len(sprite_players_list)):
+                                if int(sprite_players_list[i].address.split(':')[1]) == int(cur_data[0]):
+                                    if sprite_players_list[i].flag_rocket:
+                                        self.rocket_sprite = rocket.Rocket()
+                                        self.rocket_sprite.change_x = -math.sin(math.radians(angle)) * 11
+                                        self.rocket_sprite.change_y = math.cos(math.radians(angle)) * 11
 
-                            self.rocket_sprite.center_x = x
-                            self.rocket_sprite.center_y = y
-                            self.rocket_sprite.angle = angle
+                                        self.rocket_sprite.center_x = x
+                                        self.rocket_sprite.center_y = y
+                                        self.rocket_sprite.angle = angle
 
-                            if int(cur_data[0]) == int(user_socket):
-                                rocket_list_client_mutex.acquire()
-                                rocket_list_client.append(self.rocket_sprite)
-                                rocket_list_client_mutex.release()
-                            else:
-                                rocket_list_mutex.acquire()
-                                rocket_list.append(self.rocket_sprite)
-                                rocket_list_mutex.release()
+                                        if int(cur_data[0]) == int(user_socket):
+                                            rocket_list_client_mutex.acquire()
+                                            rocket_list_client.append(self.rocket_sprite)
+                                            rocket_list_client_mutex.release()
+                                        else:
+                                            rocket_list_mutex.acquire()
+                                            rocket_list.append(self.rocket_sprite)
+                                            rocket_list_mutex.release()
 
                 print()
             except socket.error:
