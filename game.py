@@ -64,6 +64,8 @@ class Player(arcade.Sprite):
         #self.thrust = 2
         #self.rot_speed = 2
         #self.speed = 5
+        self.flag_bullets = False
+        self.shot_counter = 0
         self.bullets_ammunition = 100
         self.health = 100
         self.address = address  # server address
