@@ -20,6 +20,7 @@ client_input = {
 
 client_mouse = {
     'left_mouse': 0,
+    'right_mouse': 0,
 }
 
 server_output = {
@@ -48,6 +49,12 @@ bullet_list_mutex = Lock()
 
 bullet_list_client = arcade.SpriteList()
 bullet_list_client_mutex = Lock()
+
+rocket_list = arcade.SpriteList()
+rocket_list_mutex = Lock()
+
+rocket_list_client = arcade.SpriteList()
+rocket_list_client_mutex = Lock()
 
 explosion_list_mutex = Lock()
 

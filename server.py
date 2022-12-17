@@ -83,11 +83,11 @@ class TCPReciv(Thread):
                         player.get_tcp_sock().sendall(f'g;{msg}#'.encode())
                 if data[0] == 'z':
                     data = data[1].split(';')
-                    print(data)
-                    if data[3].find('1') == 0:
-                        #data = data[1].split(';')
-                        print(data)
-                        msg = f'{data[0]};{data[1]};{float(data[2])}'
+                    #print(data)
+                    # if data[3].find('1') == 0:
+                    #     #data = data[1].split(';')
+                    #     print(data)
+                    msg = f'{data[0]};{data[1]};{float(data[2])};{data[3]}'
                     for player in players_list:
                         player.get_tcp_sock().sendall(f'z;{msg}#'.encode())
             except socket.error as e:
