@@ -10,6 +10,7 @@ import server as server
 import explosion as expl
 import icons as icons
 import arcade.gui
+import time
 
 
 BUFSIZE = 1024
@@ -60,7 +61,7 @@ class SpaceGameClient:
 
     def run(self):
         window = arcade.Window(WINDOW_WIDTH, WINDOW_HEIGHT, TITLE, fullscreen=True)
-        game = ClientGame()
+        game = StartView()
         window.show_view(game)
         arcade.run()
 
@@ -102,14 +103,14 @@ class StartView(arcade.View):
 
         @start_button.event("on_click")
         def on_click_start(event):
-            arcade.play_sound(sound_button)
+            #arcade.play_sound(sound_button)
             game_view = EnterView()
             self.window.show_view(game_view)
             self.manager.disable()
 
         @quit_button.event("on_click")
         def on_click_quit(event):
-            arcade.play_sound(sound_button)
+            #arcade.play_sound(sound_button)
             arcade.exit()
 
         self.manager.add(
@@ -187,14 +188,14 @@ class EnterView(arcade.View):
 
         @clear_button.event("on_click")
         def on_click_start(event):
-            arcade.play_sound(self.sound_button)
+            #arcade.play_sound(self.sound_button)
             self.input_field.text = ''
 
         @start_button.event("on_click")
         def on_click_start(event):
-            arcade.play_sound(self.sound_button)
+            #arcade.play_sound(self.sound_button)
             if (len(self.input_field.text) <= 20) and (self.input_field.text != 'Введите сюда ваш ник'):
-                arcade.play_sound(self.sound_button)
+                #arcade.play_sound(self.sound_button)
                 game_view = ClientGame()
                 self.window.show_view(game_view)
                 self.manager.disable()
@@ -208,7 +209,7 @@ class EnterView(arcade.View):
 
         @back_button.event("on_click")
         def on_click_quit(event):
-            arcade.play_sound(self.sound_button)
+            #arcade.play_sound(self.sound_button)
             game_view = StartView()
             self.window.show_view(game_view)
             self.manager.disable()
@@ -227,7 +228,7 @@ class EnterView(arcade.View):
         nickname = self.input_field.text
 
     def on_click(self, event):
-        arcade.play_sound(self.sound_button)
+        #arcade.play_sound(self.sound_button)
         self.update_text()
 
 
