@@ -195,8 +195,8 @@ class EnterView(arcade.View):
         def on_click_start(event):
             arcade.play_sound(self.sound_button)
             if (len(self.input_field.text) <= 20) and (self.input_field.text != 'Введите сюда ваш ник'):
-                game_view = Game()
-                game_view.setup()
+                arcade.play_sound(self.sound_button)
+                game_view = ClientGame()
                 self.window.show_view(game_view)
                 self.manager.disable()
             else:
