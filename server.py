@@ -12,6 +12,8 @@ SENDING_SPEED = 1/15
 
 DEFAULT_COORD = ((1800, 800), (1800, 1800), (2800, 800), (2800, 1800))
 
+rating_table = {}
+
 #tcp_socket = None
 #udp_socket = None
 

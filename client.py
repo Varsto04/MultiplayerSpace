@@ -11,6 +11,7 @@ import explosion as expl
 import icons as icons
 import arcade.gui
 import time
+from server import rating_table
 
 
 BUFSIZE = 1024
@@ -78,7 +79,7 @@ class StartView(arcade.View):
 
         self.v_box = arcade.gui.UIBoxLayout()
 
-        sound_button = arcade.Sound(file_name='Sounds/Retro3.wav')
+        #sound_button = arcade.Sound(file_name='Sounds/Retro3.wav')
 
         button_style = {
             "font_size": 30,
@@ -141,7 +142,7 @@ class EnterView(arcade.View):
 
         self.v_box = arcade.gui.UIBoxLayout()
 
-        self.sound_button = arcade.Sound(file_name='Sounds/Retro3.wav')
+        #self.sound_button = arcade.Sound(file_name='Sounds/Retro3.wav')
 
         button_style = {
             "font_size": 30,
@@ -226,6 +227,8 @@ class EnterView(arcade.View):
         self.label.text = f'#Ваш ник: {self.input_field.text}'
         global nickname
         nickname = self.input_field.text
+        rating_table[nickname] = 0
+        print(rating_table)
 
     def on_click(self, event):
         #arcade.play_sound(self.sound_button)
@@ -310,7 +313,7 @@ class ClientGame(arcade.View):
         # global shot_counter
         # shot_counter = 0
 
-        self.sound_explosion = arcade.Sound(file_name="Sounds/explosion09.wav")
+        #self.sound_explosion = arcade.Sound(file_name="Sounds/explosion09.wav")
 
         arcade.set_background_color((0, 0, 0))
 
@@ -339,6 +342,15 @@ class ClientGame(arcade.View):
                     arcade.csscolor.AQUA,
                     18,
                 )
+
+        self.rating_table = f'{rating_table}'
+        arcade.draw_text(
+            self.rating_table,
+            1000,
+            1000,
+            arcade.csscolor.AQUA,
+            18,
+        )
 
         self.icon_rocket.draw()
         self.icon_rocket_2.draw()
@@ -691,7 +703,7 @@ class TCPReciv(Thread):
         super().__init__()
         self.__tcp_socket = tcp_sock
         self.work = True
-        self.sound_laser = arcade.Sound(file_name=":resources:sounds/laser1.mp3")
+        #self.sound_laser = arcade.Sound(file_name=":resources:sounds/laser1.mp3")
 
     def run(self):
         while self.work:
