@@ -1,6 +1,5 @@
 from game import *
 import arcade
-#from components.chat import *
 import socket
 from threading import Thread
 from interaction_manager import InteractionManager

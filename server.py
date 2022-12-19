@@ -1,11 +1,10 @@
 import arcade
-
-import interaction_manager
 from game import *
 import socket
 from threading import Thread
 from interaction_manager import InteractionManager
 import schedule
+
 
 BUFSIZE = 1024
 ADDRESS = (SERVER_IP, SERVER_PORT)

@@ -1,8 +1,8 @@
 import arcade
 import copy
 import math
-import time
 from threading import Lock
+
 
 WINDOW_WIDTH, WINDOW_HEIGHT = arcade.window_commands.get_display_size()
 SERVER_IP = '127.0.0.1'
