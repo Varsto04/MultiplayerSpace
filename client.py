@@ -11,7 +11,6 @@ import explosion as expl
 import icons as icons
 import arcade.gui
 import time
-from server import rating_table
 
 
 BUFSIZE = 1024
@@ -227,8 +226,6 @@ class EnterView(arcade.View):
         self.label.text = f'#Ваш ник: {self.input_field.text}'
         global nickname
         nickname = self.input_field.text
-        rating_table[nickname] = 0
-        print(rating_table)
 
     def on_click(self, event):
         #arcade.play_sound(self.sound_button)
@@ -343,14 +340,14 @@ class ClientGame(arcade.View):
                     18,
                 )
 
-        self.rating_table = f'{rating_table}'
-        arcade.draw_text(
-            self.rating_table,
-            1000,
-            1000,
-            arcade.csscolor.AQUA,
-            18,
-        )
+                self.rating_table = f'{nickname}'
+                arcade.draw_text(
+                    self.rating_table,
+                    sprite_players_list[i].center_x - 30,
+                    sprite_players_list[i].center_y + 110,
+                    arcade.csscolor.AQUA,
+                    18,
+                )
 
         self.icon_rocket.draw()
         self.icon_rocket_2.draw()
