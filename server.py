@@ -7,8 +7,19 @@ import schedule
 
 
 BUFSIZE = 1024
-ADDRESS = (SERVER_IP, SERVER_PORT)
 SENDING_SPEED = 1/15
+
+with open('ip_port.txt', encoding='utf-8') as f:
+    read_data = f.read()
+f.close()
+read_data = read_data.split(';')
+ip = read_data[0].split(':')[1]
+port = read_data[1].split(':')[1]
+# SERVER_IP = ip
+# SERVER_PORT = port
+ADDRESS = (ip, int(port))
+
+#ADDRESS = (SERVER_IP, SERVER_PORT)
 
 DEFAULT_COORD = ((1800, 800), (1800, 1800), (2800, 800), (2800, 1800))
 

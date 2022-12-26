@@ -17,7 +17,16 @@ import time
 
 BUFSIZE = 1024
 SENDING_SPEED = 1/30
-ADDRESS = (SERVER_IP, SERVER_PORT)
+
+with open('ip_port.txt', encoding='utf-8') as f:
+    read_data = f.read()
+f.close()
+read_data = read_data.split(';')
+ip = read_data[0].split(':')[1]
+port = read_data[1].split(':')[1]
+# SERVER_IP = ip
+# SERVER_PORT = port
+ADDRESS = (ip, int(port))
 
 
 class SpaceGameClient:
@@ -902,13 +911,6 @@ class TCPReciv(Thread):
 
 
 def main():
-    with open('ip_port.txt', encoding='utf-8') as f:
-        read_data = f.read()
-    f.close()
-    read_data = read_data.split(';')
-    ip = read_data[0].split(':')[1]
-    port = read_data[1].split(':')[1]
-    print(ip, port)
     client = SpaceGameClient()
     if client.init():
         client.run()
