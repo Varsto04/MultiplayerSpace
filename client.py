@@ -1,3 +1,5 @@
+import sys
+
 from game import *
 import arcade
 import socket
@@ -95,8 +97,8 @@ class StartView(arcade.View):
         start_button = arcade.gui.UIFlatButton(text="Начать", width=400, height=100, font_size=100, style=button_style)
         self.v_box.add(start_button.with_space_around(bottom=20))
 
-        authors_button = arcade.gui.UIFlatButton(text="Авторы", width=400, height=100, style=button_style)
-        self.v_box.add(authors_button.with_space_around(bottom=20))
+        # authors_button = arcade.gui.UIFlatButton(text="Авторы", width=400, height=100, style=button_style)
+        # self.v_box.add(authors_button.with_space_around(bottom=20))
 
         quit_button = arcade.gui.UIFlatButton(text="Выход", width=400, height=100, style=button_style)
         self.v_box.add(quit_button.with_space_around(bottom=20))
@@ -111,6 +113,7 @@ class StartView(arcade.View):
         @quit_button.event("on_click")
         def on_click_quit(event):
             #arcade.play_sound(sound_button)
+            arcade.close_window()
             arcade.exit()
 
         self.manager.add(
@@ -340,6 +343,7 @@ class ClientGame(arcade.View):
                     18,
                 )
 
+                global nickname
                 self.rating_table = f'{nickname}'
                 arcade.draw_text(
                     self.rating_table,
@@ -587,6 +591,7 @@ class ClientGame(arcade.View):
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.Q:
+            arcade.close_window()
             arcade.exit()
         if symbol == arcade.key.A:
             client_input['left'] = 1
