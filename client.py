@@ -19,15 +19,6 @@ BUFSIZE = 1024
 SENDING_SPEED = 1/30
 ADDRESS = (SERVER_IP, SERVER_PORT)
 
-# tcp_socket = None
-# udp_socket = None
-# window = None
-# game = None
-# work = True
-
-
-#sprite_players_list = None
-
 
 class SpaceGameClient:
     def __init__(self):
@@ -80,8 +71,6 @@ class StartView(arcade.View):
 
         self.v_box = arcade.gui.UIBoxLayout()
 
-        #sound_button = arcade.Sound(file_name='Sounds/Retro3.wav')
-
         button_style = {
             "font_size": 30,
             "font_color": arcade.color.AQUA,
@@ -97,22 +86,17 @@ class StartView(arcade.View):
         start_button = arcade.gui.UIFlatButton(text="Начать", width=400, height=100, font_size=100, style=button_style)
         self.v_box.add(start_button.with_space_around(bottom=20))
 
-        # authors_button = arcade.gui.UIFlatButton(text="Авторы", width=400, height=100, style=button_style)
-        # self.v_box.add(authors_button.with_space_around(bottom=20))
-
         quit_button = arcade.gui.UIFlatButton(text="Выход", width=400, height=100, style=button_style)
         self.v_box.add(quit_button.with_space_around(bottom=20))
 
         @start_button.event("on_click")
         def on_click_start(event):
-            #arcade.play_sound(sound_button)
             game_view = EnterView()
             self.window.show_view(game_view)
             self.manager.disable()
 
         @quit_button.event("on_click")
         def on_click_quit(event):
-            #arcade.play_sound(sound_button)
             arcade.close_window()
             arcade.exit()
 
@@ -143,8 +127,6 @@ class EnterView(arcade.View):
         self.manager.enable()
 
         self.v_box = arcade.gui.UIBoxLayout()
-
-        #self.sound_button = arcade.Sound(file_name='Sounds/Retro3.wav')
 
         button_style = {
             "font_size": 30,
@@ -191,14 +173,11 @@ class EnterView(arcade.View):
 
         @clear_button.event("on_click")
         def on_click_start(event):
-            #arcade.play_sound(self.sound_button)
             self.input_field.text = ''
 
         @start_button.event("on_click")
         def on_click_start(event):
-            #arcade.play_sound(self.sound_button)
             if (len(self.input_field.text) <= 20) and (self.input_field.text != 'Введите сюда ваш ник'):
-                #arcade.play_sound(self.sound_button)
                 game_view = ClientGame()
                 self.window.show_view(game_view)
                 self.manager.disable()
@@ -212,7 +191,6 @@ class EnterView(arcade.View):
 
         @back_button.event("on_click")
         def on_click_quit(event):
-            #arcade.play_sound(self.sound_button)
             game_view = StartView()
             self.window.show_view(game_view)
             self.manager.disable()
@@ -231,7 +209,6 @@ class EnterView(arcade.View):
         nickname = self.input_field.text
 
     def on_click(self, event):
-        #arcade.play_sound(self.sound_button)
         self.update_text()
 
 
@@ -301,19 +278,8 @@ class ClientGame(arcade.View):
         self.explosion_texture_list = arcade.load_spritesheet(file_name, sprite_width, sprite_height, columns, count)
         self.explosions_list = arcade.SpriteList()
 
-        #global bullet_k
-        #bullet_k = 1
-
         global bullet_flag
         bullet_flag = True
-
-        # global bullets_flag
-        # bullets_flag = False
-
-        # global shot_counter
-        # shot_counter = 0
-
-        #self.sound_explosion = arcade.Sound(file_name="Sounds/explosion09.wav")
 
         arcade.set_background_color((0, 0, 0))
 
@@ -443,9 +409,7 @@ class ClientGame(arcade.View):
                 if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
                     collision_player_bullet = arcade.check_for_collision(bullet, sprite_players_list[i])
                     if collision_player_bullet:
-                        #bullet_remove.acquire()
                         bullet.remove_from_sprite_lists()
-                        #bullet_remove.release()
                         sprite_players_list[i].health -= 5
 
         for rocket in rocket_list:
@@ -461,9 +425,7 @@ class ClientGame(arcade.View):
                 if int(sprite_players_list[i].address.split(':')[1]) != int(user_socket):
                     collision_player_client_bullet = arcade.check_for_collision(bullet_client, sprite_players_list[i])
                     if collision_player_client_bullet:
-                        #bullet_remove.acquire()
                         bullet_client.remove_from_sprite_lists()
-                        #bullet_remove.release()
                         sprite_players_list[i].health -= 5
 
         for rocket_client in rocket_list_client:
@@ -488,7 +450,6 @@ class ClientGame(arcade.View):
                     explosion_list_mutex.acquire()
                     self.explosions_list.append(explosion)
                     explosion_list_mutex.release()
-                    #arcade.play_sound(self.sound_explosion, volume=0.1)
                     sprite_players_list[i].center_x -= 80
                     sprite_players_list[i].center_y -= 80
                     sprite_players_list[j].center_x += 80
@@ -668,8 +629,6 @@ class TCPSend(Thread):
     def send_data(self):
         # отправление на сервер адреса, координат и угол клиента
         if 1 in client_input.values():
-            #print('Sending move...')
-            #data = f'g;{user_socket};'
             for i in range(0, len(sprite_players_list)):
                 if int(sprite_players_list[i].address.split(':')[1]) == int(user_socket):
                     x = sprite_players_list[i].center_x
@@ -705,7 +664,6 @@ class TCPReciv(Thread):
         super().__init__()
         self.__tcp_socket = tcp_sock
         self.work = True
-        #self.sound_laser = arcade.Sound(file_name=":resources:sounds/laser1.mp3")
 
     def run(self):
         while self.work:
@@ -716,30 +674,25 @@ class TCPReciv(Thread):
                 for cur_data in data:
                     cur_data.strip()
                     if len(cur_data) and cur_data[0] == 'c':
-                        #print(cur_data)
                         address, coords = InteractionManager.parse_coords_message(cur_data)
                         player_sprite = Player(address)
                         player_sprite.center_x = coords[0]
                         player_sprite.center_y = coords[1]
                         sprite_players_list.append(player_sprite)
                     if len(cur_data) and cur_data[0] == 'g':
-                        #print(cur_data)
                         cur_data = cur_data.split(';', 1)[1]
                         cur_data = cur_data.split(';')
                         print(cur_data)
                         for i in range(0, len(sprite_players_list)):
                             if int(sprite_players_list[i].address.split(':')[1]) == int(cur_data[0]):
-                                #print(cur_data)
                                 x, y = cur_data[1].split(':')[0], cur_data[1].split(':')[1]
                                 angle = cur_data[2]
                                 sprite_players_list[i].angle = float(angle)
                                 sprite_players_list[i].center_x = float(x)
                                 sprite_players_list[i].center_y = float(y)
                     if len(cur_data) and cur_data[0] == 'z':
-                        #print(cur_data)
                         cur_data = cur_data.split(';', 1)[1]
                         cur_data = cur_data.split(';')
-                        #print(cur_data)
                         x, y = cur_data[1].split(':')[0], cur_data[1].split(':')[1]
                         angle = cur_data[2]
 

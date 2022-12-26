@@ -24,11 +24,6 @@ class InteractionManager:
         message = ''
         for values in move_dict.values():
             message += str(values) + ':'
-        # data += str(values) + ';'
-        #
-        # data = data[:-1].encode('utf-8')
-        # data = bytes(data)
         message = message[:-1]
         message += '#'
-        #return message.encode()
         return message

@@ -58,8 +58,6 @@ rocket_list_client_mutex = Lock()
 
 explosion_list_mutex = Lock()
 
-#bullet_remove = Lock()
-
 
 class Player(arcade.Sprite):
     def __init__(self, address):
@@ -68,9 +66,6 @@ class Player(arcade.Sprite):
         self.server_output = copy.copy(server_output)
         self.interpolate_output = copy.copy(interpolate_output)
         self.player_stats = copy.copy(player_stats)
-        #self.thrust = 2
-        #self.rot_speed = 2
-        #self.speed = 5
         self.flag_bullets = False
         self.flag_rocket = False
         self.shot_counter = 0

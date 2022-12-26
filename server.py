@@ -14,9 +14,6 @@ DEFAULT_COORD = ((1800, 800), (1800, 1800), (2800, 800), (2800, 1800))
 
 rating_table = {}
 
-#tcp_socket = None
-#udp_socket = None
-
 
 class TCPReciv(Thread):
     def __init__(self, client_socket):
@@ -37,14 +34,6 @@ class TCPReciv(Thread):
                 if data[0] == 'g':
                     data = data[1].split(';')
                     move_input = data[3].split(':')
-                    # if self.player_sprite.center_x < 35:
-                    #     self.player_sprite.center_x += 10
-                    # elif self.player_sprite.center_y < 35:
-                    #     self.player_sprite.center_y += 10
-                    # elif self.player_sprite.center_y > 2965:
-                    #     self.player_sprite.center_y -= 10
-                    # elif self.player_sprite.center_x > 4965:
-                    #     self.player_sprite.center_x -= 10
                     if move_input[0] == '1':
                         data[2] = float(data[2]) + 0.6
                     elif move_input[1] == '1':
@@ -65,7 +54,6 @@ class TCPReciv(Thread):
                             x = float(x)
                         else:
                             x = float(x) + change_x
-                        #x = float(x) + change_x
 
                         if float(y) < 25:
                             y = float(y)
@@ -73,7 +61,6 @@ class TCPReciv(Thread):
                             y = float(y)
                         else:
                             y = float(y) + change_y
-                        #y = float(y) + change_y
 
                         data[1] = str(x) + ':' + str(y)
                     if move_input[3] == '1':
@@ -84,10 +71,6 @@ class TCPReciv(Thread):
                         player.get_tcp_sock().sendall(f'g;{msg}#'.encode())
                 if data[0] == 'z':
                     data = data[1].split(';')
-                    #print(data)
-                    # if data[3].find('1') == 0:
-                    #     #data = data[1].split(';')
-                    #     print(data)
                     msg = f'{data[0]};{data[1]};{float(data[2])};{data[3]}'
                     for player in players_list:
                         player.get_tcp_sock().sendall(f'z;{msg}#'.encode())
@@ -138,24 +121,17 @@ class TCPConnect(Thread):
 class SpaceGameServer:
     def __init__(self):
         self.__tcp_socket = None
-        # self.__receiver = None
         self.__acceptor = None
-        #self.__udp_socket = None
 
     def __del__(self):
         if self.__tcp_socket:
             self.__tcp_socket.close()
-        # if self.__receiver:
-        #     self.__receiver.join()
         if self.__acceptor:
             self.__acceptor.join()
 
     def init(self):
         self.__tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__tcp_socket.bind(ADDRESS)
-
-        #self.__receiver = TCPReciv(self.__tcp_socket)
-        #self.__receiver.start()
 
     def run(self):
         self.__tcp_socket.listen()
